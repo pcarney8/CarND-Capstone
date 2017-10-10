@@ -2,6 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Int32
 from styx_msgs.msg import Lane, Waypoint
 
 import math
@@ -26,33 +27,51 @@ LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this n
 
 class WaypointUpdater(object):
     def __init__(self):
+        rospy.loginfo('initializing the waypoint updater')
+
         rospy.init_node('waypoint_updater')
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
-        # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
-
+        rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
+        rospy.Subscriber('/obstacle_waypoint', PoseStamped, self.obstacle_cb)
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+        # might need to initialize these?
+        # self.current_pose
+        # self.base_waypoints
+        # self.obstacles
 
         rospy.spin()
 
     def pose_cb(self, msg):
+        rospy.loginfo('position callback method')
         # TODO: Implement
+        self.current_pose = msg
+        # can't publish full set of waypoints here, probably just update position
+
+        # publishing the same waypoints for the partial start
+        # which looks like doesn't actually work.
+        self.final_waypoints_pub.publish(self.base_waypoints)
         pass
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement
+        rospy.loginfo('waypoints callback method')
+        # This is only called once, set the base_waypoints for the whole class
+        # and then this method will not be called again until a reboot
+        self.base_waypoints = waypoints
         pass
 
     def traffic_cb(self, msg):
+        rospy.loginfo('traffic waypoint callback method')
         # TODO: Callback for /traffic_waypoint message. Implement
         pass
 
     def obstacle_cb(self, msg):
+        rospy.loginfo('obstacle waypoint callback method')
         # TODO: Callback for /obstacle_waypoint message. We will implement it later
         pass
 
